@@ -6,10 +6,11 @@ pipeline{
         stage ('Build Docker Image') {
             steps{
                 script{
-                    dockerapp = docker.build("shuzito/kube-news:${env.BUILD_ID}", '-f ./Dockerfile ./src')
+                    dockerapp = docker.build("shuzito/kube-news:${env.BUILD_ID}", '-f ./dockerfile ./src')
                 }
             }
         }
+    }    
     stage('Push Docker Image'){
         steps{
             script{
@@ -19,6 +20,13 @@ pipeline{
             }
         }
     }
-
+    stage('Deploy Kubernetes'){
+        steps{
+            withKubeconfig(credentialsId: 'kubeconfig')
+                sh 'kubectl apply -f ./k8s/deployment.yaml'
+            }
+        }
     }
+
 }
+
